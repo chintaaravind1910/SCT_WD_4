@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do Web App</title>
+  <style>
+    /* ==== General Styles ==== */
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+    }
+
+    .todo-container {
+      width: 450px;
+      background: #1e1e2f;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 2rem;
+      letter-spacing: 1px;
+    }
+
+    /* ==== Input Area ==== */
+    .input-area {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .input-area input, .input-area button {
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+    }
+    .input-area input {
+      width: 100%;
+      outline: none;
+    }
+    .input-area button {
+      background: linear-gradient(135deg, #43cea2, #185a9d);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .input-area button:hover {
+      transform: scale(1.05);
+    }
+
+    /* ==== Filters ==== */
+    .filters {
+      margin: 15px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+    .filters button {
+      flex: 1;
+      margin: 0 5px;
+      padding: 8px;
+      border-radius: 10px;
+      border: none;
+      background: #2a2a40;
+      color: #bbb;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filters button.active,
+    .filters button:hover {
+      background: #43cea2;
+      color: white;
+    }
+
+    /* ==== Task List ==== */
+    .task {
+      background: #2a2a40;
+      padding: 15px;
+      border-radius: 12px;
+      margin: 10px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s ease, opacity 0.3s ease;
+    }
+    .task span {
+      display: block;
+      font-size: 15px;
+    }
+    .task small {
+      color: #999;
+      font-size: 12px;
+    }
+    .task.completed span {
+      text-decoration: line-through;
+      color: #888;
+    }
+
+    /* ==== Buttons inside tasks ==== */
+    .task button {
+      border: none;
+      border-radius: 8px;
+      padding: 6px 8px;
+      margin-left: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: transform 0.2s ease;
+    }
+    .task button:hover {
+      transform: scale(1.1);
+    }
+    .complete { background: #43cea2; color: white; }
+    .edit { background: #ffaf40; color: white; }
+    .delete { background: #ff4757; color: white; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="todo-container">
+    <h1>📝 To-Do Web App</h1>
+
+    <!-- Input Area -->
+    <div class="input-area">
+      <input type="text" id="taskInput" placeholder="Enter your task...">
+      <input type="datetime-local" id="taskDateTime">
+      <button onclick="addTask()">Add Task</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <button onclick="filterTasks('all')" class="active">All</button>
+      <button onclick="filterTasks('completed')">Completed</button>
+      <button onclick="filterTasks('pending')">Pending</button>
+    </div>
+
+    <!-- Task List -->
+    <div id="taskList"></div>
+  </div>
+
+  <script>
+    let currentFilter = "all";
+
+    function addTask() {
+      let taskInput = document.getElementById("taskInput").value;
+      let taskDateTime = document.getElementById("taskDateTime").value;
+      if(taskInput === "") {
+        alert("Please enter a task");
+        return;
+      }
+
+      let taskList = document.getElementById("taskList");
+
+      let taskDiv = document.createElement("div");
+      taskDiv.classList.add("task");
+
+      let taskContent = document.createElement("div");
+      taskContent.innerHTML = `<span>${taskInput}</span><small>${taskDateTime}</small>`;
+
+      let btns = document.createElement("div");
+
+      let completeBtn = document.createElement("button");
+      completeBtn.innerText = "✔";
+      completeBtn.classList.add("complete");
+      completeBtn.onclick = () => taskDiv.classList.toggle("completed");
+
+      let editBtn = document.createElement("button");
+      editBtn.innerText = "✎";
+      editBtn.classList.add("edit");
+      editBtn.onclick = () => {
+        let newTask = prompt("Edit Task", taskInput);
+        if(newTask) {
+          taskInput = newTask;
+          taskContent.innerHTML = `<span>${newTask}</span><small>${taskDateTime}</small>`;
+        }
+      };
+
+      let deleteBtn = document.createElement("button");
+      deleteBtn.innerText = "🗑";
+      deleteBtn.classList.add("delete");
+      deleteBtn.onclick = () => taskDiv.remove();
+
+      btns.appendChild(completeBtn);
+      btns.appendChild(editBtn);
+      btns.appendChild(deleteBtn);
+
+      taskDiv.appendChild(taskContent);
+      taskDiv.appendChild(btns);
+
+      taskList.appendChild(taskDiv);
+
+      document.getElementById("taskInput").value = "";
+      document.getElementById("taskDateTime").value = "";
+    }
+
+    function filterTasks(type) {
+      currentFilter = type;
+      let buttons = document.querySelectorAll(".filters button");
+      buttons.forEach(btn => btn.classList.remove("active"));
+      event.target.classList.add("active");
+
+      let tasks = document.querySelectorAll(".task");
+      tasks.forEach(task => {
+        if(type === "all") {
+          task.style.display = "flex";
+        } else if(type === "completed") {
+          task.style.display = task.classList.contains("completed") ? "flex" : "none";
+        } else {
+          task.style.display = !task.classList.contains("completed") ? "flex" : "none";
+        }
+      });
+    }
+  </script>
+</body>
+</html>
